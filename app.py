@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 import energy_consumption_loader
 import repository
+import ac_utils
 from flask_pymongo import pymongo
 
 app = Flask(__name__)
@@ -47,11 +48,16 @@ fans = generate_params(fans, [60, 101])
 def welcome_page():
     global res
     print("welcome_page")
+    sources = load_values()
+    print(sources)
     return render_template("index.html")
 
 @app.route("/load")
 def load_values():
+    print("in values loader")
     return jsonify({'temps': tempretures, 'valves': valves, 'fans': fans})
+
+
 
 @app.route("/", methods=['POST'])
 def make_predict():
@@ -60,21 +66,39 @@ def make_predict():
     request_data_temp = request.form['option_1']
     request_data_valv = request.form['option_2']
     request_data_fan = request.form['option_3']
+    request_data_it_value = request.form['option_it']
 
-    selected_attributes['temp'] = request_data_temp
-    selected_attributes['valv'] = request_data_valv
-    selected_attributes['fan'] = request_data_fan
+    request_data_temp = float(request_data_temp.replace(",", "."))
+    request_data_valv = float(request_data_valv.replace(",", "."))
+    request_data_fan = float(request_data_fan.replace(",", "."))
+    request_data_it_value = float(request_data_it_value.replace(",", "."))
+
+
+   # request_data_temp, request_data_valv, request_data_fan = float_converter([request_data_temp, request_data_valv, request_data_fan])
 
     try:
-        global res
-        prediction_value = energy_consumption_loader.predictor([int(request_data_temp),
-                                         int(request_data_valv),
-                                         int(request_data_fan)])
+        # Predict an Energy value
+        repo = repository.Mongo_db_repository()
+        model = repo.get_model()
+        print("model loaded")
+        prediction_value = energy_consumption_loader.predictor(loaded_model=model, values=[request_data_temp,
+                                         request_data_valv,
+                                         request_data_fan])
 
+        pue_value = ac_utils.pue_calculator(request_data_it_value,prediction_value)
+        print("pue value:  ")
+        print(pue_value)
+        print("model_predicted")
+        # Write values to DB
+        repo.insert_records(request_data_temp, request_data_valv, request_data_fan, prediction_value, pue_value, request_data_it_value)
+        print("inserted")
         return render_template("evaluate.html", tempretures= {"temp": request_data_temp, "valv": request_data_valv,
-                                                       "fan": request_data_fan, "res":"{:.2f}".format(prediction_value)} )
+                                                       "fan": request_data_fan, "res":"{:.2f}".format(prediction_value),
+                                                       "pue": "{:.2f}".format(pue_value)} )
     except Exception as e:
         return "{}".format(e)
+
+
 
 @app.route("/save", methods=['POST'])
 def save_values():

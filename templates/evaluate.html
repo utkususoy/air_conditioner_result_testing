@@ -13,18 +13,15 @@
         </div>
         <div class="modal-body">
           <div></div>
-            <div style="margin-top: 40px;">
-              <label>Enerji Tüketim Tahmini:</label>
+            <div style="text-align: center; margin-top: 40px;">
+              <h4> Saatlik Enerji Tüketim Tahmini:</h4>
               <label style="border: 1px; border-style: solid; margin-left: 10px; width: 70px;">{{tempretures.res}}</label>
+              <label style="margin-left:5px">kWh</label>
             </div>
-            <div style="margin-top: 40px; margin-left: 30px;">
-              
-                <label style="margin-left: 3px;">Gerçek Değer:</label>
-                <input style="margin-left: 10px; width: 70px;" type="text" id="real_value" />
 
-                <a style="height: 37px; margin-left: 20px; text-align: center;" 
-                   class="btn btn-secondary" onclick="saveValues(`{{tempretures.temp }}`, `{{ tempretures.valv }}`, `{{ tempretures.fan }}`,`{{ tempretures.res  }}`)">Gönder</a>
-            
+            <div style="text-align: center; margin-top: 40px;">
+              <h4> PUE Değeri:</h4>
+              <label style="border: 1px; border-style: solid; width: 70px;">{{tempretures.pue}}</label>
             </div>
         </div>
       </div>
@@ -32,33 +29,4 @@
   </div>
 {% endblock %}
 {% block script %}
-<script>
-
-function saveValues(temp_, valve_, fan_, res_) {
-    var input_text = document.getElementById("real_value").value;
-    
-    var entry = {
-            "tempreture": temp_,
-            "valve": valve_,
-            "fan": fan_,
-            "predicted_value": res_,
-            "real_value": input_text
-        }
-
-    console.log(entry)
-
-    fetch(`${window.origin}/save`, {
-            method: "POST",
-            credentials: "include",
-            body: JSON.stringify(entry),
-            cache: "no-cache",
-            headers: new Headers({
-                "content-type": "application/json"
-            })
-        })
-
-        window.history.replaceState(null, document.title, "/")
-}
-</script>
-
 {% endblock %}

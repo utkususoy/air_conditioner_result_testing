@@ -9,123 +9,117 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
-    <script type="text/javascript">
-        var loaded_data;
-        function httpGetAsync(theUrl, callback) {
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function() {
-                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-                    callback(xmlHttp.responseText);
-            }
-            xmlHttp.open("GET", theUrl, true); // true for asynchronous
-            xmlHttp.send(null);
-        }
-        var json;
-        httpGetAsync('http://192.168.1.9:3000/load', function(response) {
-            json = JSON.parse(response);
-            let select_temp = document.querySelector("#option_1")
-
-            for (let elt of json.temps){
-                let option = document.createElement("option");
-                option.text = elt.val;
-                option.value = elt.val;
-                select_temp.appendChild(option);
-            }
-
-            let select_valve = document.querySelector("#option_2")
-
-            for (let elt of json.valves){
-                let option = document.createElement("option");
-                option.text = elt.val;
-                option.value = elt.val;
-                select_valve.appendChild(option);
-            }
-
-            let select_fan = document.querySelector("#option_3")
-
-            for (let elt of json.fans){
-                let option = document.createElement("option");
-                option.text = elt.val;
-                option.value = elt.val;
-                select_fan.appendChild(option);
-            }
-        } )
-
-    </script>
+    
 
     <title>Testing</title>
     
 </head>
+{% block evaluate %}
 <body style="text-align: center; margin-top: 5em;">
 
     <form action="/" method="POST" style=" display:inline-block; display: flex; flex-direction:row; margin-left: 35%;">
         <div >
             <div style=" display:inline-block; display: flex; flex-direction:row; ">
-                <h3>Sıcaklık: </h3>
-                <select id = "option_1" name="option_1" style="margin-left: 15px; height: 38px; width: 148px;">
-                </select>
+                <h3>Sıcaklık (°C):</h3>
+
+                <input type="text" id = "option_1" name="option_1" pattern="^([0-9]|[0-9]+(\.|,)?[0-9]+$)" required style="margin-left: 15px; height: 38px; width: 148px;" 
+                oninvalid="TempretureInvalidMsg(this);"
+                oninput="TempretureInvalidMsg(this);"
+
+                />
+
             </div>
 
             <div style=" display:inline-block; display: flex; flex-direction:row; margin-top: 10px;">
-                <h3>Vana: </h3>
-                <select style="margin-left: 49px; margin-right: 10px; height: 38px; width: 148px;" id = "option_2" name="option_2" >
-                </select>
-                <button id="button" type="submit" value="submit" class="btn btn-primary" onClick="return checkform();" style="height: 40px; margin-left: 20px; background-color: white; border-color: black; color: black;" onsubmit="">Tahmin Et</button>
+                <h3>Vana (%):</h3>
+                <input style="margin-left: 57px; margin-right: 10px; height: 38px; width: 148px;" id = "option_2" name="option_2" 
+                pattern="^([0-9]|[0-9]+(\.|,)?[0-9]+$)" required
+                oninvalid="ValveInvalidMsg(this);"
+                oninput="ValveInvalidMsg(this);"
+                />
             </div>
 
             <div style=" display:inline-block; display: flex; flex-direction:row; margin-top: 10px;">
-                <h3>Fan: </h3>
-                <select id = "option_3" name="option_3" style="margin-left: 65px; height: 38px; width: 148px;"></select>
+                <h3>Fan (%):</h3>
+                <input id = "option_3" name="option_3" style="margin-left: 73px; height: 38px; width: 148px;"
+                pattern="^([0-9]|[0-9]+(\.|,)?[0-9]+$)" required
+                oninvalid="FanInvalidMsg(this);"
+                oninput="FanInvalidMsg(this);"
+                />
+            </div>
+
+            <div style=" display:inline-block; display: flex; flex-direction:row; margin-top: 30px;">
+                <h3>IT Enerji Tüketimi:</h3>
+                <input id = "option_it" name="option_it" style="margin-left: 30px; height: 38px; width: 148px;"
+                pattern="^([0-9]|[0-9]+(\.|,)?[0-9]+$)" required
+                oninvalid="PueInvalidMsg(this);"
+                oninput="PueInvalidMsg(this);"
+                />
+            </div>
+            <div>
+                <button id="button" type="submit" value="submit" class="btn btn-primary" style="margin-top: 40px; height: 40px; margin-left: 20px; background-color: white; border-color: black; color: black;" >Tahmin Et</button>
             </div>
         </div>
         </form>
-{% block evaluate %}{% endblock %}
+{% endblock %}
 
 </body>
 {% block script %}
 <script>
-function get_optional_indexes() {
 
-    var option_temp = document.getElementById("option_1");
-    var option_valv = document.getElementById("option_2");
-    var option_fan = document.getElementById("option_3");
+// "^[0-9]*\.?*$"
+    // "^[0-9]+(\.|,)?[0-9]+$"
+    // *(\.|,)+[0-9]*
 
-    var entry = {
-            "tempreture": option_temp.options[option_temp.selectedIndex].text,
-            "valve": option_valv.options[option_valv.selectedIndex].text,
-            "fan": option_fan.options[option_fan.selectedIndex].text
-        }
+function TempretureInvalidMsg(textbox) {
+    console.log(textbox.value)
+ //   console.log(textbox.validity.patternMismatch)
+ //   console.log(document.getElementById("option_1"))
+    if (textbox.value === '') {
+        textbox.setCustomValidity('Sıcaklık alanı boş bırakılamaz.');
+    } else if (textbox.validity.patternMismatch){
+        textbox.setCustomValidity('Uygun sıcaklık formatı giriniz. Örnek: "38.6" veya "38.70"');
+    } else if (textbox.value < 18 || textbox.value > 30){
+        textbox.setCustomValidity('Girilen Sıcaklık değeri 18-30 arasında olmalıdır.');
+    } else {
+       textbox.setCustomValidity('');
+    }
 
-    console.log(entry)
-
-    fetch(`${window.origin}/model`, {
-            method: "POST",
-            credentials: "include",
-            body: JSON.stringify(entry),
-            cache: "no-cache",
-            headers: new Headers({
-                "content-type": "application/json"
-            })
-        })
+    return true;
 }
 
-function checkform() {
+function ValveInvalidMsg(textbox) {
+    if (textbox.value === '') {
+        textbox.setCustomValidity('Vana alanı boş bırakılamaz.');
+    } else if (textbox.validity.patternMismatch){
+        textbox.setCustomValidity('Uygun Vana formatı giriniz. Örnek: "38.6" veya "38.70"');
+    } else if (textbox.value < 0 || textbox.value > 100){
+        textbox.setCustomValidity('Girilen Vana değeri 0-100 arasında olmalıdır.');
+    } else {
+       textbox.setCustomValidity('');
+    }
+}
 
-    var option_temp = document.getElementById("option_1");
-    var option_valv = document.getElementById("option_2");
-    var option_fan = document.getElementById("option_3");
+function FanInvalidMsg(textbox) {
+    if (textbox.value === '') {
+        textbox.setCustomValidity('Fan alanı boş bırakılamaz.');
+    } else if (textbox.validity.patternMismatch){
+        textbox.setCustomValidity('Uygun Fan formatı giriniz. Örnek: "38.6" veya "38.70"');
+    } else if (textbox.value < 0 || textbox.value > 100){
+        textbox.setCustomValidity('Girilen Fan değeri 0-100 arasında olmalıdır.');
+    } else {
+       textbox.setCustomValidity('');
+    }
+}
 
-    console.log(option_temp.options[option_temp.selectedIndex].text)
-    console.log(option_valv.options[option_valv.selectedIndex].text)
-
-    if(option_temp.options[option_temp.selectedIndex].text == "---Sıcaklık seç---" ||
-       option_valv.options[option_valv.selectedIndex].text == "---Vana seç---" ||
-       option_fan.options[option_fan.selectedIndex].text == "---Fan seç---"){
-        alert("Sıcaklık, Vana ve Fan bölümleri için lütfen SAYISAL değer seçiniz.");
-        return false;
-       } else{
-            return true
-        }
+function PueInvalidMsg(textbox) {
+    if (textbox.value === '') {
+        textbox.setCustomValidity('Pue alanı boş bırakılamaz.');
+    } else if (textbox.validity.patternMismatch){
+        textbox.setCustomValidity('Uygun Pue formatı giriniz. Örnek: "100" veya "100.70"');
+    } else {
+       textbox.setCustomValidity('');
+    }
 }
 </script>
 
