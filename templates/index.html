@@ -51,7 +51,7 @@
             <div style=" display:inline-block; display: flex; flex-direction:row; margin-top: 30px;">
                 <h3>IT Enerji Tüketimi:</h3>
                 <input id = "option_it" name="option_it" style="margin-left: 30px; height: 38px; width: 148px;"
-                pattern="^([0-9]|[0-9]+(\.|,)?[0-9]+$)" required
+                pattern="^([0-9]|[0-9]+(\.|,)?[0-9]+$)"
                 oninvalid="PueInvalidMsg(this);"
                 oninput="PueInvalidMsg(this);"
                 />
@@ -113,9 +113,7 @@ function FanInvalidMsg(textbox) {
 }
 
 function PueInvalidMsg(textbox) {
-    if (textbox.value === '') {
-        textbox.setCustomValidity('Pue alanı boş bırakılamaz.');
-    } else if (textbox.validity.patternMismatch){
+    if (textbox.validity.patternMismatch){
         textbox.setCustomValidity('Uygun Pue formatı giriniz. Örnek: "100" veya "100.70"');
     } else {
        textbox.setCustomValidity('');

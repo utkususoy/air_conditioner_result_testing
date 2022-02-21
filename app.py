@@ -58,7 +58,6 @@ def load_values():
     return jsonify({'temps': tempretures, 'valves': valves, 'fans': fans})
 
 
-
 @app.route("/", methods=['POST'])
 def make_predict():
     global selected_attributes
@@ -71,7 +70,7 @@ def make_predict():
     request_data_temp = float(request_data_temp.replace(",", "."))
     request_data_valv = float(request_data_valv.replace(",", "."))
     request_data_fan = float(request_data_fan.replace(",", "."))
-    request_data_it_value = float(request_data_it_value.replace(",", "."))
+
 
 
    # request_data_temp, request_data_valv, request_data_fan = float_converter([request_data_temp, request_data_valv, request_data_fan])
@@ -85,16 +84,22 @@ def make_predict():
                                          request_data_valv,
                                          request_data_fan])
 
-        pue_value = ac_utils.pue_calculator(request_data_it_value,prediction_value)
-        print("pue value:  ")
-        print(pue_value)
-        print("model_predicted")
-        # Write values to DB
-        repo.insert_records(request_data_temp, request_data_valv, request_data_fan, prediction_value, pue_value, request_data_it_value)
-        print("inserted")
-        return render_template("evaluate.html", tempretures= {"temp": request_data_temp, "valv": request_data_valv,
+        if request_data_it_value == "":
+            print("none")
+            pue_value = "not_set"
+            repo.insert_records(request_data_temp, request_data_valv, request_data_fan, prediction_value, pue_value, request_data_it_value)
+            return render_template("evaluate.html", tempretures= {"temp": request_data_temp, "valv": request_data_valv,
+                                                       "fan": request_data_fan, "res":"{:.2f}".format(prediction_value),
+                                                       "pue": pue_value} )
+
+        else:
+            request_data_it_value = float(request_data_it_value.replace(",", "."))
+            pue_value = ac_utils.pue_calculator(request_data_it_value,prediction_value)
+            repo.insert_records(request_data_temp, request_data_valv, request_data_fan, prediction_value, pue_value, request_data_it_value)
+            return render_template("evaluate.html", tempretures= {"temp": request_data_temp, "valv": request_data_valv,
                                                        "fan": request_data_fan, "res":"{:.2f}".format(prediction_value),
                                                        "pue": "{:.2f}".format(pue_value)} )
+        
     except Exception as e:
         return "{}".format(e)
 

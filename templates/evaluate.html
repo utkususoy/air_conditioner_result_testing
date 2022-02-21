@@ -18,11 +18,19 @@
               <label style="border: 1px; border-style: solid; margin-left: 10px; width: 70px;">{{tempretures.res}}</label>
               <label style="margin-left:5px">kWh</label>
             </div>
-
-            <div style="text-align: center; margin-top: 40px;">
+            <div id="pue_div" style="text-align: center; margin-top: 40px;">
               <h4> PUE Değeri:</h4>
               <label style="border: 1px; border-style: solid; width: 70px;">{{tempretures.pue}}</label>
             </div>
+            <script>
+              if(`{{tempretures.pue}}` == "not_set") {
+                console.log("hidden")
+                document.getElementById("pue_div").style.visibility="hidden"; 
+              }else {
+                console.log("visible")
+                document.getElementById("pue_div").style.visibility="visible"; 
+              }
+            </script>
         </div>
       </div>
     </div>
