@@ -87,7 +87,7 @@ def make_predict():
         if request_data_it_value == "":
             print("none")
             pue_value = "not_set"
-            repo.insert_records(request_data_temp, request_data_valv, request_data_fan, prediction_value, pue_value, request_data_it_value)
+            repo.insert_records(request_data_temp, request_data_valv, request_data_fan, prediction_value, None, None)
             return render_template("evaluate.html", tempretures= {"temp": request_data_temp, "valv": request_data_valv,
                                                        "fan": request_data_fan, "res":"{:.2f}".format(prediction_value),
                                                        "pue": pue_value} )

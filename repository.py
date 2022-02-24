@@ -12,7 +12,7 @@ class Mongo_db_repository:
         self.db = self.client['airconditionerDb']
 
     def insert_records(self,request_data_temp, request_data_valv, request_data_fan, prediction_value, pue_value, it_value ):
-        self.db['test'].insert_one({"tempreture": request_data_temp, "valve": request_data_valv,
+        self.db['results'].insert_one({"tempreture": request_data_temp, "valve": request_data_valv,
                                     "fan": request_data_fan, "predicted_value": prediction_value,
                                     "it_value": it_value, "pue": pue_value,
                                     'date': datetime.datetime.now()})
